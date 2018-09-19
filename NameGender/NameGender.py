@@ -34,7 +34,7 @@ def setModel(path, test_size):
     # Split-out test and train datasets
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=float(test_size))
 
-    #Vectorizing the X values created by the patterns function
+    #Training a vectorizer for the X_train values
     vectorizer = DictVectorizer()
     vectorizer.fit(X_train)
 
