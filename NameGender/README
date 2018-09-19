@@ -1,14 +1,20 @@
-This is the python implemntation of a supervised classification algorithm that predicts the gender of names. The ML algorithm used is Decision Tree Classifier.
 
-It provides a 98% of training accuracy and a 86% of testing accuracy when evaluated with the dataset dataset/dataset.csv and a 0.3 testing size / 0.7 training size. 
+This is the python implemntation of a supervised classification algorithm that predicts the gender of names. 
+The ML algorithm used is Decision Tree Classifier.
 
-Syntax:
+It provides a 98% of training accuracy and a 86% of testing accuracy when 
+evaluated with the dataset dataset/dataset.csv and a 0.3 testing size / 0.7 training size. 
+
+------------------------------------------------------------------------------------
+
+Command line syntax:
 
 python NameGender.py accuracy [path_to_dataset.csv] [test_size] 
 python NameGender.py predict [path_to_dataset.csv] [test_size] [names_to_predict.txt]
 
-Examples:
+-------------------------------------------------------------------------------------
 
+Examples:
 
 INPUT
     python NameGender.py accuracy dataset/dataset.csv 0.3
@@ -27,3 +33,20 @@ OUTPUT
         Ruth            F
      Phoenix            M
      Joaquin            M
+
+-------------------------------------------------------------------------------------
+
+Dataset: It works with csv datasets with the following sintax:
+    int(Index number),string(Name),string(gender)
+where gender is F for Female and M for male.
+
+-------------------------------------------------------------------------------------
+
+Names to predict file: It is a simple txt file with a name for every line:
+    [Name 1]
+    [Name 2]
+    .
+    .
+    .
+    [Name N]
+
