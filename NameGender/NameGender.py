@@ -6,7 +6,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.model_selection import train_test_split
 
-#Function that defines patterns usable for solving the problem
+#Function that defines useful patterns for solving the problem
 def patterns(name):
     return {
         'first': name[0], # First letter of the name
@@ -17,7 +17,7 @@ def patterns(name):
         'last3': name[-3:], #Last 3 letters of the name
     }
 
-#This vectorizes the patterns function in order to make it processable by the ML algorithm
+#This vectorizes the patterns function in order to make easier to handle 
 patterns = numpy.vectorize(patterns)
 
 #This function sets the whole model
