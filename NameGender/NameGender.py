@@ -1,79 +1,70 @@
 # Load libraries
+import sys
 import pandas
 import numpy
-from pandas.plotting import scatter_matrix
-import matplotlib.pyplot as plt
-from sklearn import model_selection
-from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import accuracy_score
-from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.naive_bayes import GaussianNB
-from sklearn.svm import SVC
+from sklearn.feature_extraction import DictVectorizer
+from sklearn.model_selection import train_test_split
 
-#Defining the function that makes names processable
-def name_transformation(name):
-    arr = numpy.zeros(52)
-    for ind, x in enumerate(name):
-        arr[ord(x)-ord('a')] += 1
-        return arr
+#Function that defines patterns usable for solving the problem
+def patterns(name):
+    return {
+        'first': name[0], # First letter of the name
+        'first2': name[0:2], # First 2 letters of the name
+        'first3': name[0:3], # First 3 letters of the name
+        'last': name[-1], #Last letter of the name
+        'last2': name[-2:], #Last 2 letters of the name
+        'last3': name[-3:], #Last 3 letters of the name
+    }
 
-# Loading dataset
-path = "/home/dsalazar/Machine-Learning/NameGender/dataset/yob2010.txt"
-names = ['Name', 'Gender', 'Count']
-dataset = pandas.read_csv(path,names=names)
-dataset['Name'] = dataset['Name'].str.lower()
-dataset = dataset.drop(dataset[dataset.Count < 20].index)
+#This vectorizes the patterns function in order to make it processable by the ML algorithm
+patterns = numpy.vectorize(patterns)
 
-#name_map returns an array of properties taking a name as input
-name_map = numpy.vectorize(name_transformation, otypes=[numpy.ndarray])
+#This function sets the whole model
+def setModel(path, test_size):
+    # Loading dataset
+    names = ['Index', 'Name', 'Gender']
+    dataset = pandas.read_csv(path,names=names)
+    dataset['Name'] = dataset['Name'].str.lower()
 
-#Obtaining Xs and Ys
-Xname = dataset['Name']
-Xlist = name_map(dataset['Name'])
-X = numpy.array(Xlist.tolist())
-Y = dataset['Gender']
+    #Obtaining Xs and Ys
+    X = patterns(dataset['Name'])
+    Y = dataset['Gender']
 
-# Split-out validation dataset
-validation_size = 0.30
-seed = 7
-X_train, X_validation, Y_train, Y_validation = model_selection.train_test_split(X, Y, test_size=validation_size, random_state=seed)
+    # Split-out test and train datasets
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=float(test_size))
 
-# Test options and evaluation metric
-scoring = 'accuracy'
+    #Vectorizing the X values created by the patterns function
+    vectorizer = DictVectorizer()
+    vectorizer.fit(X_train)
 
-# Spot Check Algorithms
-models = []
-models.append(('RFC', RandomForestClassifier()))
-models.append(('KNN', KNeighborsClassifier()))
-models.append(('CART', DecisionTreeClassifier()))
-models.append(('NB', GaussianNB()))
-#models.append(('SVM', SVC()))
-# evaluate each model in turn
-results = []
-names = []
-for name, model in models:
-    kfold = model_selection.KFold(n_splits=10, random_state=seed)
-    cv_results = model_selection.cross_val_score(model, X_train, Y_train, cv=kfold, scoring=scoring)
-    results.append(cv_results)
-    names.append(name)
-    msg = "%s: %f (%f)" % (name, cv_results.mean(), cv_results.std())
-    print(msg)
+    # Defining Decision Tree Classifier Algorithm on training dataset
+    alg = DecisionTreeClassifier()
+    alg.fit(vectorizer.transform(X_train), Y_train)
 
-# Make predictions on validation dataset
-svm = DecisionTreeClassifier()
-svm.fit(X_train, Y_train)
-predictions = svm.predict(X_validation)
-print(accuracy_score(Y_validation, predictions))
-print(confusion_matrix(Y_validation, predictions))
-print(classification_report(Y_validation, predictions))
+    # Returning all the relevant varibles for the model
+    return alg, vectorizer, patterns, X_train, X_test, Y_train, Y_test
 
-idx = numpy.random.choice(numpy.arange(len(Xlist)), 10, replace=False)
-xs = Xname[idx]
-ys = Y[idx]
-pred = svm.predict(X[idx])
-for a,b, p in zip(xs,ys, pred):
-    print a,b, p
+#Some strings for correct syntax helping
+invalid_command = "   Please Please specify a valid command. Syntax: \n"
+acc = "   python NameGender.py accuracy [path_to_dataset.csv] [test_size] \n"
+pred = "   python NameGender.py predict [path_to_dataset.csv] [test_size] [names_to_predict.txt] \n"
+
+#Main script
+if(len(sys.argv) < 2):
+    print invalid_command + acc + pred
+elif(sys.argv[1] == "accuracy" and len(sys.argv) == 4):
+    alg, vectorizer, patterns, X_train, X_test, Y_train, Y_test = setModel(sys.argv[2],sys.argv[3])
+    print "Accuracy on Training Set: %f" % (alg.score(vectorizer.transform(X_train), Y_train))
+    print "Accuracy on Testing Set: %f" % (alg.score(vectorizer.transform(X_test), Y_test))
+elif(sys.argv[1] == "predict" and len(sys.argv) == 5):
+    alg, vectorizer, patterns, X_train, X_test, Y_train, Y_test = setModel(sys.argv[2],sys.argv[3])
+    names = open(sys.argv[4]).read().split()
+    names_lowercase = [x.lower() for x in names]
+    genders = alg.predict(vectorizer.transform(patterns(names_lowercase)))
+    print "{:>12} {:>12}".format('Name', 'Gender')
+    for i in xrange(len(names)):
+        print "{:>12} {:>12}".format(names[i], genders[i])
+else:
+    print invalid_command + acc + pred
+
