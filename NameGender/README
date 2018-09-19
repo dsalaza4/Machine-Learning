@@ -1,5 +1,5 @@
 
-This is the python implemntation of a supervised classification algorithm that predicts the gender of names. 
+This is a python2.7 implemntation of a supervised classification algorithm that predicts the gender of names. 
 The ML algorithm used is Decision Tree Classifier.
 
 It provides a 98% of training accuracy and a 86% of testing accuracy when 
@@ -37,7 +37,13 @@ OUTPUT
 -------------------------------------------------------------------------------------
 
 Dataset: It works with csv datasets with the following sintax:
-    int(Index number),string(Name),string(gender)
+    int(Index number0),string(Name0),string(gender)
+    int(Index number1),string(Name1),string(gender)
+    int(Index number2),string(Name2),string(gender)
+    .
+    .
+    .
+    int(Index numberN),string(NameN),string(gender)
 where gender is F for Female and M for male.
 
 -------------------------------------------------------------------------------------
@@ -50,3 +56,11 @@ Names to predict file: It is a simple txt file with a name for every line:
     .
     [Name N]
 
+------------------------------------------------------------------------------------
+
+Dependencies:
+- python 2.7
+- sys
+- pandas
+- numpy
+- sklearn
